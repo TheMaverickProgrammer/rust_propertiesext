@@ -2,7 +2,7 @@
 A [`.properties`][SPEC] parser with extended bracket notation for grouping keys.
 
 ## Getting Started
-This crate provides a `.properties` two static methods:
+This crate provides two static methods:
   1. `pub fn parse_file(file: &File) -> HashMap<String, String>` 
      1. Call to parse by file
   2. `pub fn parse_string(body: &str) -> HashMap<String, String>`
