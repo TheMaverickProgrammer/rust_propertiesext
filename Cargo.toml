@@ -1,6 +1,14 @@
 [package]
 name = "propertiesext"
-version = "0.1.0"
+authors = ["TheMaverickProgrammer"]
+version = "1.0.0"
 edition = "2021"
+license-file = "LICENSE-APACHE"
+description = "A (dot) properties file parser with extended feature set"
+homepage = "https://github.com/TheMaverickProgrammer/rust_propertiesext"
+repository = "https://github.com/TheMaverickProgrammer/rust_propertiesext"
+readme = "README.md"
+keywords = ["parser", "simple", "script", "reader", "customize"]
+categories = ["config", "game-development", "parsing"]
 
 [dependencies]
