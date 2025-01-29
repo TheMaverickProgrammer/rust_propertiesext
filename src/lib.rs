@@ -96,8 +96,8 @@ impl Parser {
                 // Note: here the line is already stored in `key`.
                 if self.key.ends_with(Glyphs::CurlyLeft.as_char()) {
                     self.trailing_append = true;
-                    let next_key = self.key[..self.key.len() - 1].to_owned();
-                    self.prefix_stack.push(next_key.clone());
+                    let next_key = self.key[..self.key.len() - 1].trim();
+                    self.prefix_stack.push(next_key.to_string());
                     self.prefix += &next_key;
                     return;
                 }
@@ -124,8 +124,8 @@ impl Parser {
             // If none of these were found, then the whole line must be a key...
             if line.ends_with(Glyphs::CurlyLeft.as_char()) {
                 self.trailing_append = true;
-                let next_key = line[..line.len() - 1].to_owned();
-                self.prefix_stack.push(next_key.clone());
+                let next_key = line[..line.len() - 1].trim();
+                self.prefix_stack.push(next_key.to_string());
                 self.prefix += &next_key;
                 return;
             }
@@ -169,7 +169,7 @@ pub fn parse_file(file: &File) -> MapType {
 mod tests {
     #[test]
     fn basic_parse_string() {
-        let body = "my-app.{
+        let body = "my-app. {
             service-in-use=\"{}\"\\
                 is in use.
             ask-delete=You want to delete \"{}\"?
@@ -177,13 +177,13 @@ mod tests {
                 Do you want to restart it?
         }
 
-        mail-service.{
+        mail-service. {
             default=Which mail do you want to read?
             empty= You have no mail
         }
 
         # General YES/NO labels
-        *.{
+        *. {
             yes=YES
             no=NO
         }";
@@ -218,7 +218,7 @@ mod tests {
 
     #[test]
     fn colon_test() {
-        let body = "my-app.{
+        let body = "my-app. {
             service-in-use:\"{}\"\\
                 is in use.
             ask-delete:   You want to delete \"{}\"?
@@ -226,13 +226,13 @@ mod tests {
                 Do you want to restart it?
         }
 
-        mail-service.{
+        mail-service. {
             default        :Which mail do you want to read?
             empty: You have no mail
         }
 
         # General YES/NO labels
-        *.{
+        *. {
             yes : YES
             no      :      NO
         }";
@@ -284,5 +284,62 @@ mod tests {
         assert_eq!(hash.get("hello").unwrap(), "world");
         assert_eq!(hash.get("weather").unwrap(), "good");
         assert_eq!(hash.get("wumbology").unwrap(), "the study of wumbo");
+    }
+
+    #[test]
+    fn deep_keys() {
+        let body = "1. {
+            2. {
+                3. {
+                    waldo: Found me!
+                }
+                waldo: Hotter, but not here!
+            }
+            waldo: Very cold.
+        }
+        ";
+
+        let hash = super::parse_string(body);
+
+        for (key, val) in &hash {
+            println!("key={}, val={}", key, val);
+        }
+
+        assert_eq!(hash.len(), 3);
+        assert_eq!(hash.get("1.2.3.waldo").unwrap(), "Found me!");
+        assert_eq!(hash.get("1.2.waldo").unwrap(), "Hotter, but not here!");
+        assert_eq!(hash.get("1.waldo").unwrap(), "Very cold.");
+    }
+
+    #[test]
+    fn empty_expected() {
+        let body = "1. {
+            2. {
+                3. {
+                }
+            }
+        }
+        ";
+
+        let hash = super::parse_string(body);
+
+        for (key, val) in &hash {
+            println!("key={}, val={}", key, val);
+        }
+
+        assert_eq!(hash.len(), 0);
+    }
+
+    #[test]
+    fn empty_expected2() {
+        let body = "";
+
+        let hash = super::parse_string(body);
+
+        for (key, val) in &hash {
+            println!("key={}, val={}", key, val);
+        }
+
+        assert_eq!(hash.len(), 0);
     }
 }

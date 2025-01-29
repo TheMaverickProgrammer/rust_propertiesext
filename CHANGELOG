@@ -1,0 +1,7 @@
+# 1.0.1
+* Typo in readme fix. 
+* Added another test for deeply nested keys.
+* Fixed bug not trimming keys that end with the curly brace.
+
+# 1.0.0
+* Initial release
